@@ -1,0 +1,140 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model StudentInfo {
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  studentID       String?
+  AssessmentScore AssessmentScore[]
+}
+
+model CourseInfo {
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  courseNumber    String?
+  courseTitle     String?
+  departmentId    String?
+  department      Departments?      @relation(fields: [departmentId], references: [id])
+  CourseOutcomes  CourseOutcomes[]
+  Curriculum      Curriculum[]
+  AssessmentScore AssessmentScore[]
+}
+
+model Departments {
+  id         String       @id @default(uuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  Department String?
+  Abrev      String?
+  courses    CourseInfo[]
+  pathways   Pathways[]
+}
+
+model Pathways {
+  id           String            @id @default(uuid())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+  PathwayTitle String?
+  departmentId String?
+  department   Departments?      @relation(fields: [departmentId], references: [id])
+  outcomes     PathwayOutcomes[]
+  curriculum   Curriculum[]
+}
+
+model Curriculum {
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  deletedAt DateTime?
+  Pathway   String?
+  Course    String?
+  pathway   Pathways?   @relation(fields: [Pathway], references: [id])
+  course    CourseInfo? @relation(fields: [Course], references: [id])
+}
+
+model CourseOutcomes {
+  id                 String            @id @default(uuid())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deletedAt          DateTime?
+  CourseID           String?
+  OutcomeTitle       String?
+  OutcomeDescription String?
+  course             CourseInfo?       @relation(fields: [CourseID], references: [id])
+  OutcomeMapping     OutcomeMapping[]
+  AssessmentScore    AssessmentScore[]
+}
+
+model PathwayOutcomes {
+  id               String           @id @default(uuid())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+  PathwayID        String?
+  PathOutcomeTitle String?
+  PathOutcomeDesc  String?
+  pathway          Pathways?        @relation(fields: [PathwayID], references: [id])
+  OutcomeMapping   OutcomeMapping[]
+}
+
+model InstitutionalGoals {
+  id             String           @id @default(uuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  IGTitle        String?
+  IGDescription  String?
+  OutcomeMapping OutcomeMapping[]
+}
+
+model GECC {
+  id             String           @id @default(uuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+  GECCTitle      String?
+  GECCDesc       String?
+  OutcomeMapping OutcomeMapping[]
+}
+
+model OutcomeMapping {
+  id             String              @id @default(uuid())
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+  CourseOutcome  String?
+  PathwayOutcome String?
+  GECC           String?
+  IG             String?
+  courseOutcome  CourseOutcomes?     @relation(fields: [CourseOutcome], references: [id])
+  pathwayOutcome PathwayOutcomes?    @relation(fields: [PathwayOutcome], references: [id])
+  gecc           GECC?               @relation(fields: [GECC], references: [id])
+  ig             InstitutionalGoals? @relation(fields: [IG], references: [id])
+}
+
+model AssessmentScore {
+  id             String          @id @default(uuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  StudentID      String?
+  AssignmentID   String?
+  CourseID       String?
+  CourseOutcome  String?
+  Score          Int?
+  student        StudentInfo?    @relation(fields: [StudentID], references: [id])
+  course         CourseInfo?     @relation(fields: [CourseID], references: [id])
+  courseOutcomes CourseOutcomes? @relation(fields: [CourseOutcome], references: [id])
+}
