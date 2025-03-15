@@ -17,17 +17,34 @@ model StudentInfo {
 }
 
 model CourseInfo {
-  id              String            @id @default(uuid())
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  deletedAt       DateTime?
-  courseNumber    String?
-  courseTitle     String?
-  departmentId    String?
-  department      Departments?      @relation(fields: [departmentId], references: [id])
-  CourseOutcomes  CourseOutcomes[]
-  Curriculum      Curriculum[]
-  AssessmentScore AssessmentScore[]
+  id                  String                @id @default(uuid())
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+  courseNumber        String?
+  courseTitle         String?
+  departmentId        String?
+  department          Departments?          @relation(fields: [departmentId], references: [id])
+  CourseOutcomes      CourseOutcomes[]
+  Curriculum          Curriculum[]
+  AssessmentScore     AssessmentScore[]
+
+  // Relations for prerequisites
+  prerequisites       CoursePrerequisite[]  @relation("CourseToPrerequisite")
+  isPrerequisiteFor   CoursePrerequisite[]  @relation("PrerequisiteToCourse")
+
+  // Relation for sessions
+  sessionCourses      SessionCourse[]
+}
+
+model CoursePrerequisite {
+  id               String      @id @default(uuid())
+  courseId         String
+  prerequisiteId   String
+  canBeConcurrent  Boolean     @default(false)
+
+  course           CourseInfo  @relation(fields: [courseId], references: [id], name: "CourseToPrerequisite")
+  prerequisite     CourseInfo  @relation(fields: [prerequisiteId], references: [id], name: "PrerequisiteToCourse")
 }
 
 model Departments {
@@ -51,6 +68,39 @@ model Pathways {
   department   Departments?      @relation(fields: [departmentId], references: [id])
   outcomes     PathwayOutcomes[]
   curriculum   Curriculum[]
+  sessions     PathwaySession[]
+}
+
+model PathwaySession {
+  id         String    @id @default(uuid())
+  pathwayId  String
+  sessionId  String
+  order      Int
+  pathway    Pathways  @relation(fields: [pathwayId], references: [id])
+  session    Session   @relation(fields: [sessionId], references: [id])
+}
+
+model Session {
+  id            String          @id @default(uuid())
+  sessionType   SessionType
+  sessionOrder  Int
+  title         String?
+  pathwaySessions PathwaySession[]
+  sessionCourses  SessionCourse[]
+}
+
+model SessionCourse {
+  id         String      @id @default(uuid())
+  sessionId  String
+  courseId   String
+  session    Session    @relation(fields: [sessionId], references: [id])
+  course     CourseInfo @relation(fields: [courseId], references: [id])
+}
+
+enum SessionType {
+  SEMESTER
+  QUARTER
+  TRIMESTER
 }
 
 model Curriculum {

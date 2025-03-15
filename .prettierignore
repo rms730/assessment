@@ -1,0 +1,5 @@
+/coverage
+/logs
+/src/docs
+/node_modules
+/jest-html-reporters-attach
